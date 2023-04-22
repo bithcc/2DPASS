@@ -40,9 +40,9 @@ def load_yaml(file_name):
 def parse_config():
     parser = ArgumentParser()
     # general
-    parser.add_argument('--gpu', type=int, nargs='+', default=(0,), help='specify gpu devices')
-    parser.add_argument("--seed", default=0, type=int)
-    parser.add_argument('--config_path', default='config/2DPASS-semantickitti.yaml')
+    parser.add_argument('--gpu', type=int, nargs='+', default=(0,), help='specify gpu devices')#选择使用的gpu
+    parser.add_argument("--seed", default=0, type=int)#选择使用的随机种子
+    parser.add_argument('--config_path', default='config/2DPASS-semantickitti.yaml')#选择使用的参数文件，主要包括模型参数、数据集参数、训练的配置文件
     # training
     parser.add_argument('--log_dir', type=str, default='default', help='log location')
     parser.add_argument('--monitor', type=str, default='val/mIoU', help='the maximum metric')
