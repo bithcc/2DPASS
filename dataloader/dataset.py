@@ -97,6 +97,7 @@ class point_image_dataset_semkitti(data.Dataset):
         :param y2: lower bound
         :return: points (2D and 3D) that are in the frustum
         """
+        #这一段的作用是根据传入的2d图片的左上点和右下点，选择相对应的点云数据，将点云投影到二维平面上，在范围内的点则保留，不在范围内的点则去除
         keep_ind = (points_2d[:, 0] > x1) * \
                    (points_2d[:, 1] > y1) * \
                    (points_2d[:, 0] < x2) * \
@@ -108,16 +109,16 @@ class point_image_dataset_semkitti(data.Dataset):
         'Generates one sample of data'
         data, root = self.point_cloud_dataset[index]
 
-        xyz = data['xyz']
-        labels = data['labels']
-        instance_label = data['instance_label'].reshape(-1)
-        sig = data['signal']
-        origin_len = data['origin_len']
+        xyz = data['xyz']#点云的xyz数据
+        labels = data['labels']#点云的标签数据
+        instance_label = data['instance_label'].reshape(-1)#实例标签，这个是从哪里获得的？
+        sig = data['signal']#不知道是什么，或许是反射率？
+        origin_len = data['origin_len']#不知道是什么，或许是点云的距离？
 
         ref_pc = xyz.copy()
         ref_labels = labels.copy()
         ref_index = np.arange(len(ref_pc))
-
+        #这里好像是在选择volume范围内的点
         mask_x = np.logical_and(xyz[:, 0] > self.min_volume_space[0], xyz[:, 0] < self.max_volume_space[0])
         mask_y = np.logical_and(xyz[:, 1] > self.min_volume_space[1], xyz[:, 1] < self.max_volume_space[1])
         mask_z = np.logical_and(xyz[:, 2] > self.min_volume_space[2], xyz[:, 2] < self.max_volume_space[2])
@@ -130,7 +131,7 @@ class point_image_dataset_semkitti(data.Dataset):
         ref_index = ref_index[mask]
         sig = sig[mask]
         point_num = len(xyz)
-
+        #这里应该是训练时的dropout相关代码，如果一个点被dropout了，就用xyz[0,:]的值进行替代？
         if self.dropout and self.point_cloud_dataset.imageset == 'train':
             dropout_ratio = np.random.random() * self.max_dropout_ratio
             drop_idx = np.where(np.random.random((xyz.shape[0])) <= dropout_ratio)[0]
@@ -144,8 +145,9 @@ class point_image_dataset_semkitti(data.Dataset):
 
         # load 2D data
         image = data['img']
-        proj_matrix = data['proj_matrix']
+        proj_matrix = data['proj_matrix']#这个是什么？投影矩阵？
 
+       #为什么要把点云投影到图像？是为了筛选吗？
         # project points into image
         keep_idx = xyz[:, 0] > 0  # only keep point in front of the vehicle
         points_hcoords = np.concatenate([xyz[keep_idx], np.ones([keep_idx.sum(), 1], dtype=np.float32)], axis=1)
@@ -157,7 +159,8 @@ class point_image_dataset_semkitti(data.Dataset):
         # fliplr so that indexing is row, col and not col, row
         img_points = np.fliplr(img_points)
         points_img = img_points[keep_idx_img_pts]
-
+        
+        #似乎这里的旋转也只旋转x和y坐标？
         ### 3D Augmentation ###
         # random data augmentation by rotation
         if self.rotate_aug:
@@ -165,7 +168,8 @@ class point_image_dataset_semkitti(data.Dataset):
             c, s = np.cos(rotate_rad), np.sin(rotate_rad)
             j = np.matrix([[c, s], [-s, c]])
             xyz[:, :2] = np.dot(xyz[:, :2], j)
-
+        
+        #从0、1、2、3中随机选取一个数，作为是否翻转的flag
         # random data augmentation by flip x , y or x+y
         if self.flip_aug:
             flip_type = np.random.choice(4, 1)
@@ -176,6 +180,7 @@ class point_image_dataset_semkitti(data.Dataset):
             elif flip_type == 3:
                 xyz[:, :2] = -xyz[:, :2]
 
+        #尺度增强，放大或者缩小，很奇怪的是为什么x和y要分别处理？
         if self.scale_aug:
             noise_scale = np.random.uniform(0.95, 1.05)
             xyz[:, 0] = noise_scale * xyz[:, 0]
