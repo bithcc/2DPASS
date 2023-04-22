@@ -46,8 +46,8 @@ def parse_config():
     # training
     parser.add_argument('--log_dir', type=str, default='default', help='log location')#log文件的存放地址，主要是运行后的权重文件和events文件
     parser.add_argument('--monitor', type=str, default='val/mIoU', help='the maximum metric')
-    parser.add_argument('--stop_patience', type=int, default=50, help='patience for stop training')
-    parser.add_argument('--save_top_k', type=int, default=1, help='save top k checkpoints, use -1 to checkpoint every epoch')
+    parser.add_argument('--stop_patience', type=int, default=50, help='patience for stop training')#设置如果训练时多少次没有精度变化就停止训练
+    parser.add_argument('--save_top_k', type=int, default=1, help='save top k checkpoints, use -1 to checkpoint every epoch')#保存的最好的结果的前几名
     parser.add_argument('--check_val_every_n_epoch', type=int, default=1, help='check_val_every_n_epoch')
     parser.add_argument('--SWA', action='store_true', default=False, help='StochasticWeightAveraging')
     parser.add_argument('--baseline_only', action='store_true', default=False, help='training without 2D')
