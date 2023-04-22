@@ -44,7 +44,7 @@ def parse_config():
     parser.add_argument("--seed", default=0, type=int)#选择使用的随机种子
     parser.add_argument('--config_path', default='config/2DPASS-semantickitti.yaml')#选择使用的参数文件，主要包括模型参数、数据集参数、训练的配置文件
     # training
-    parser.add_argument('--log_dir', type=str, default='default', help='log location')
+    parser.add_argument('--log_dir', type=str, default='default', help='log location')#log文件的存放地址，主要是运行后的权重文件和events文件
     parser.add_argument('--monitor', type=str, default='val/mIoU', help='the maximum metric')
     parser.add_argument('--stop_patience', type=int, default=50, help='patience for stop training')
     parser.add_argument('--save_top_k', type=int, default=1, help='save top k checkpoints, use -1 to checkpoint every epoch')
