@@ -153,4 +153,4 @@ cython_debug/
 
 #logs file
 /home/hcc/2DPASS/logs
-/home/hcc/2DPASS/data
+/home/hcc/2DPASS/dataset
